@@ -14,6 +14,12 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import fs from 'fs';
+import { exec } from 'child_process';
+
+
+
+const CONFIG_FILE_PATH = path.join(app.getPath('userData'), 'config.json');
 
 class AppUpdater {
   constructor() {
@@ -29,6 +35,92 @@ ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+ipcMain.handle('load-agents', async () => {
+  const agentsDir = path.join(__dirname, '..', '..', 'mindcraft', 'profiles');
+  return fs.promises.readdir(agentsDir);
+});
+
+ipcMain.handle('create-agent', async (event, name) => {
+  const templatePath = path.join(__dirname, '..', '..', 'mindcraft', 'andy.json');
+  const newAgentPath = path.join(__dirname, '..', '..', 'mindcraft', 'profiles', `${name}.json`);
+  
+  const templateData = await fs.promises.readFile(templatePath, 'utf8');
+  await fs.promises.writeFile(newAgentPath, templateData);
+  return true;
+});
+
+ipcMain.handle('load-agent-config', async (event, name) => {
+  const agentPath = path.join(__dirname, '..', '..', 'mindcraft', 'profiles', `${name}`);
+  const configData = await fs.promises.readFile(agentPath, 'utf8');
+  return JSON.parse(configData);
+});
+
+ipcMain.handle('save-agent-config', async (event, name, config) => {
+  const agentPath = path.join(__dirname, '..', '..', 'mindcraft', 'profiles', `${name}`);
+  await fs.promises.writeFile(agentPath, JSON.stringify(config, null, 2));
+  return true;
+});
+
+ipcMain.handle('launch-agents', async (event, command) => {
+  return new Promise((resolve, reject) => {
+    const mindcraftPath = path.join(__dirname, '..', '..', 'mindcraft');
+    
+    // Load API keys
+    let apiKeys = {};
+    try {
+      const data = fs.readFileSync(CONFIG_FILE_PATH, 'utf-8');
+      apiKeys = JSON.parse(data);
+    } catch (error) {
+      console.error('Error reading config file:', error);
+    }
+
+    // Create environment variables object
+    const env = { ...process.env, ...apiKeys };
+
+    console.log("EVAN TEST 2")
+    console.log(env)
+
+    const childProcess = exec(command, { cwd: mindcraftPath, env });
+
+    childProcess.stdout?.on('data', (data) => {
+      console.log(data.toString());
+      event.sender.send('agent-output', data.toString());
+    });
+
+    childProcess.stderr?.on('data', (data) => {
+      event.sender.send('agent-output', data.toString());
+    });
+
+    childProcess.on('close', (code) => {
+      if (code === 0) {
+        resolve('Process completed successfully');
+      } else {
+        reject(`Process exited with code ${code}`);
+      }
+    });
+  });
+});
+
+ipcMain.handle('get-api-keys', async () => {
+  try {
+    const data = await fs.promises.readFile(CONFIG_FILE_PATH, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading config file:', error);
+    return {};
+  }
+});
+
+ipcMain.handle('save-api-keys', async (event, keys) => {
+  try {
+    await fs.promises.writeFile(CONFIG_FILE_PATH, JSON.stringify(keys, null, 2));
+    return true;
+  } catch (error) {
+    console.error('Error writing config file:', error);
+    return false;
+  }
 });
 
 if (process.env.NODE_ENV === 'production') {

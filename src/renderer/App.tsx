@@ -1,50 +1,31 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-import icon from '../../assets/icon.svg';
+import 'tailwindcss/tailwind.css';
 import './App.css';
+import AgentManager from '../components/AgentManager';
+import Launcher from '../components/Launcher';
+import AppNavbar from '../components/AppNavbar';
+import { TerminalProvider } from '../context/TerminalContext';
+import { AppStateProvider } from '../context/AppStateContext';
 
-function Hello() {
-  return (
-    <div>
-      <div className="Hello">
-        <img width="200" alt="icon" src={icon} />
-      </div>
-      <h1>electron-react-boilerplate</h1>
-      <div className="Hello">
-        <a
-          href="https://electron-react-boilerplate.js.org/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              📚
-            </span>
-            Read our docs
-          </button>
-        </a>
-        <a
-          href="https://github.com/sponsors/electron-react-boilerplate"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="folded hands">
-              🙏
-            </span>
-            Donate
-          </button>
-        </a>
-      </div>
-    </div>
-  );
-}
+import Configuration from '../components/Configuration';
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Hello />} />
-      </Routes>
-    </Router>
+    <AppStateProvider>
+      <TerminalProvider>
+        <Router>
+          <div className="flex flex-col h-screen">
+            <AppNavbar />
+            <div className="flex-1 overflow-hidden">
+              <Routes>
+                <Route path="/" element={<AgentManager />} />
+                <Route path="/launcher" element={<Launcher />} />
+                <Route path="/configuration" element={<Configuration />} />
+              </Routes>
+            </div>
+          </div>
+        </Router>
+      </TerminalProvider>
+    </AppStateProvider>
   );
 }

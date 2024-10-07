@@ -1,0 +1,42 @@
+[
+    {
+      "value": "gpt-3.5-turbo",
+      "label": "GPT-3.5 Turbo",
+      "key": "OPENAI_API_KEY"
+    },
+    {
+      "value": "gpt-4o-mini",
+      "label": "GPT-4o mini",
+      "key": "OPENAI_API_KEY"
+    },
+    {
+        "value": "gpt-4",
+        "label": "GPT-4",
+        "key": "OPENAI_API_KEY"
+      },
+    {
+      "value": "gemini-pro",
+      "label": "Gemini Pro",
+      "key": "GOOGLE_API_KEY"
+    },
+    {
+        "value": "gemini-1.5-flash",
+        "label": "Gemini 1.5 Flash",
+        "key": "GOOGLE_API_KEY"
+      },
+    {
+      "value": "claude-3-haiku-20240307",
+      "label": "Claude 3 Haiku",
+      "key": "ANTHROPIC_API_KEY"
+    },
+    {
+      "value": "meta/meta-llama-3-70b-instruct",
+      "label": "Replicate meta-llama-3",
+      "key": "REPLICATE_API_KEY"
+    },
+    {
+      "value": "llama3",
+      "label": "Ollama llama3",
+      "key": null
+    }
+  ]
